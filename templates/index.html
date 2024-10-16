@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Investment Strategy Dashboard</title>
+    <!-- Include Plotly.js -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <!-- Include Papa Parse -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <!-- Link to JavaScript File -->
+    <script src="{{ url_for('static', filename='js/home_view.js') }}"></script>
+    <!-- Link to CSS File -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/home_view.css') }}">
+</head>
+<body>
+    <h1>Investment Strategy Dashboard</h1>
+    <!-- Container for Line Chart -->
+    <div id="line-chart"></div>
+    <!-- Container for Pie Chart -->
+    <div id="pie-chart"></div>
+</body>
+</html>
