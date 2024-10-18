@@ -20,10 +20,20 @@
             font-size: 14px;
             font-weight: bold;
         }
+
+        .tooltip {
+            position: absolute;
+            background-color: white;
+            border: 1px solid #ccc;
+            padding: 5px;
+            font-size: 12px;
+            pointer-events: none;
+        }
     </style>
 </head>
 <body>
     <div id="chart"></div>
+    <div id="tooltip" class="tooltip" style="opacity: 0;"></div>
 </body>
 <script>
     const margin = { top: 20, right: 30, bottom: 50, left: 60 };
@@ -37,22 +47,22 @@
         .append("g")
         .attr("transform", `translate(${margin.left},${margin.top})`);
 
+    const tooltip = d3.select("#tooltip");
+
     const parseDate = d3.timeParse("%m/%d/%Y");
 
     d3.csv("performance.csv", d => {
         d.Date = parseDate(d.Date);
         d.Portfolio = +d.Portfolio || 0;
         d.Benchmark = +d.Benchmark || 0;
-        console.log(d);
         return d;
     }).then(data => {
-        console.log(data);
         const x = d3.scaleTime()
             .domain(d3.extent(data, d => d.Date))
             .range([0, width]);
 
         const y = d3.scaleLinear()
-            .domain([0, d3.max(data, d => Math.max(d.Portfolio, d.Benchmark))])
+            .domain([-10, d3.max(data, d => Math.max(d.Portfolio, d.Benchmark))])
             .range([height, 0]);
 
         svg.append("g")
@@ -91,7 +101,38 @@
             .transition()
             .duration(4000)
             .ease(d3.easeLinear)
-            .attr("stroke-dashoffset", 0);
+            .attr("stroke-dashoffset", 0)
+            .on("end", () => {
+                // Reference the last data point
+                const lastDataPoint = data[data.length - 1];
+
+                // Add circles to the last data points after the animation
+                svg.append("circle")
+                    .attr("cx", x(lastDataPoint.Date))
+                    .attr("cy", y(lastDataPoint.Portfolio))
+                    .attr("r", 4)
+                    .attr("fill", "steelblue");
+
+                svg.append("circle")
+                    .attr("cx", x(lastDataPoint.Date))
+                    .attr("cy", y(lastDataPoint.Benchmark))
+                    .attr("r", 4)
+                    .attr("fill", "red");
+
+                // Add labels to the last data points after the animation
+                svg.append("text")
+                    .attr("x", x(lastDataPoint.Date) - 50)
+                    .attr("y", y(lastDataPoint.Portfolio) - 5)
+                    .attr("fill", "steelblue")
+                    .text(`${lastDataPoint.Portfolio.toFixed(2)}%`);
+
+                svg.append("text")
+                    .attr("x", x(lastDataPoint.Date) - 50)
+                    .attr("y", y(lastDataPoint.Benchmark) - 5)
+                    .attr("fill", "red")
+                    .text(`${lastDataPoint.Benchmark.toFixed(2)}%`);
+            });
+
 
         // Add labels for axes
         svg.append("text")
@@ -110,17 +151,39 @@
         // Add legend
         svg.append("text")
             .attr("class", "legend")
-            .attr("x", width - 120)
+            .attr("x", 20)
             .attr("y", 20)
             .attr("fill", "steelblue")
             .text("Portfolio");
 
         svg.append("text")
             .attr("class", "legend")
-            .attr("x", width - 120)
+            .attr("x", 20)
             .attr("y", 40)
             .attr("fill", "red")
             .text("Benchmark");
+
+        // Add hover effect for displaying data points
+        svg.append("rect")
+            .attr("width", width)
+            .attr("height", height)
+            .style("fill", "none")
+            .style("pointer-events", "all")
+            .on("mousemove", function (event) {
+                const [mouseX] = d3.pointer(event);
+                const xDate = x.invert(mouseX);
+                const bisectDate = d3.bisector(d => d.Date).left;
+                const index = bisectDate(data, xDate, 1);
+                const d0 = data[index - 1];
+                const d1 = data[index];
+                const d = xDate - d0.Date > d1.Date - xDate ? d1 : d0;
+
+                tooltip.transition().duration(200).style("opacity", 0.9);
+                tooltip.html(`Date: ${d.Date.toLocaleDateString()}<br>Portfolio: ${d.Portfolio}<br>Benchmark: ${d.Benchmark}`)
+                    .style("left", `${event.pageX + 10}px`)
+                    .style("top", `${event.pageY - 28}px`);
+            })
+            .on("mouseout", () => tooltip.transition().duration(500).style("opacity", 0));
     });
 </script>
 </html>
