@@ -15,6 +15,11 @@
         .axis-label {
             font-size: 12px;
         }
+
+        .legend {
+            font-size: 14px;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -36,8 +41,8 @@
 
     d3.csv("performance.csv", d => {
         d.Date = parseDate(d.Date);
-        d.Asset1 = +d.Asset1;
-        d.Asset2 = +d.Asset2;
+        d.Portfolio = +d.Portfolio;
+        d.Benchmark = +d.Benchmark;
         return d;
     }).then(data => {
         const x = d3.scaleTime()
@@ -45,7 +50,7 @@
             .range([0, width]);
 
         const y = d3.scaleLinear()
-            .domain([0, d3.max(data, d => Math.max(d.Asset1, d.Asset2))])
+            .domain([0, d3.max(data, d => Math.max(d.Portfolio, d.Benchmark))])
             .range([height, 0]);
 
         svg.append("g")
@@ -57,24 +62,24 @@
             .attr("class", "y-axis")
             .call(d3.axisLeft(y));
 
-        const line1 = d3.line()
+        const linePortfolio = d3.line()
             .x(d => x(d.Date))
-            .y(d => y(d.Asset1));
+            .y(d => y(d.Portfolio));
 
-        const line2 = d3.line()
+        const lineBenchmark = d3.line()
             .x(d => x(d.Date))
-            .y(d => y(d.Asset2));
+            .y(d => y(d.Benchmark));
 
         svg.append("path")
             .datum(data)
             .attr("class", "line")
-            .attr("d", line1)
+            .attr("d", linePortfolio)
             .attr("stroke", "steelblue");
 
         svg.append("path")
             .datum(data)
             .attr("class", "line")
-            .attr("d", line2)
+            .attr("d", lineBenchmark)
             .attr("stroke", "red");
 
         // Add transitions/animations
@@ -99,8 +104,21 @@
             .attr("text-anchor", "middle")
             .attr("transform", `translate(${-margin.left + 15}, ${height / 2})rotate(-90)`)
             .text("Growth (%)");
+
+        // Add legend
+        svg.append("text")
+            .attr("class", "legend")
+            .attr("x", width - 120)
+            .attr("y", 20)
+            .attr("fill", "steelblue")
+            .text("Portfolio");
+
+        svg.append("text")
+            .attr("class", "legend")
+            .attr("x", width - 120)
+            .attr("y", 40)
+            .attr("fill", "red")
+            .text("Benchmark");
     });
 </script>
-
-</>
-
+</html>
