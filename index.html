@@ -37,14 +37,16 @@
         .append("g")
         .attr("transform", `translate(${margin.left},${margin.top})`);
 
-    const parseDate = d3.timeParse("%Y-%m-%d");
+    const parseDate = d3.timeParse("%m/%d/%Y");
 
     d3.csv("performance.csv", d => {
         d.Date = parseDate(d.Date);
-        d.Portfolio = +d.Portfolio;
-        d.Benchmark = +d.Benchmark;
+        d.Portfolio = +d.Portfolio || 0;
+        d.Benchmark = +d.Benchmark || 0;
+        console.log(d);
         return d;
     }).then(data => {
+        console.log(data);
         const x = d3.scaleTime()
             .domain(d3.extent(data, d => d.Date))
             .range([0, width]);
