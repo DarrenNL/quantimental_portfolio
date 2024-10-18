@@ -41,8 +41,8 @@
 
     d3.csv("performance.csv", d => {
         d.Date = parseDate(d.Date);
-        d.Portfolio = +d.Portfolio || 0;
-        d.Benchmark = +d.Benchmark || 0;
+        d.Portfolio = +d['Portfolio'].trim() || 0;
+        d.Benchmark = +d['Benchmark'].trim() || 0;
         console.log(d);
         return d;
     }).then(data => {
