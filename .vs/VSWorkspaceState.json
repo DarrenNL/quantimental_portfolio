@@ -1,12 +1,7 @@
 {
   "ExpandedNodes": [
-    "",
-    "\\data",
-    "\\static",
-    "\\static\\css",
-    "\\static\\js",
-    "\\templates"
+    ""
   ],
-  "SelectedNode": "\\static\\css\\style.css",
+  "SelectedNode": "\\.gitattributes",
   "PreviewInSolutionExplorer": false
 }
